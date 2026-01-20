@@ -1,0 +1,18 @@
+{
+    "HomePage": {
+        "title": "MovieVerdict",
+        "subtitle": "建立在信任之上的电影评价"
+    },
+    "Navigation": {
+        "browse": "浏览",
+        "search": "搜索",
+        "howItWorks": "运作方式",
+        "login": "登录",
+        "signUp": "注册",
+        "dashboard": "仪表板",
+        "admin": "管理",
+        "tests": "测试",
+        "verdicts": "评价",
+        "promotions": "推广"
+    }
+}

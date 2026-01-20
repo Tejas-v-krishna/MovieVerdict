@@ -1,0 +1,18 @@
+{
+    "HomePage": {
+        "title": "MovieVerdict",
+        "subtitle": "विश्वास-आधारित मूवी फैसले"
+    },
+    "Navigation": {
+        "browse": "ब्राउज़ करें",
+        "search": "खोजें",
+        "howItWorks": "यह कैसे काम करता है",
+        "login": "लॉग इन",
+        "signUp": "साइन अप",
+        "dashboard": "डैशबोर्ड",
+        "admin": "व्यवस्थापक",
+        "tests": "टेस्ट",
+        "verdicts": "फैसले",
+        "promotions": "प्रचार"
+    }
+}

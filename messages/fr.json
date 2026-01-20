@@ -1,0 +1,18 @@
+{
+    "HomePage": {
+        "title": "MovieVerdict",
+        "subtitle": "Verdicts de films basés sur la confiance"
+    },
+    "Navigation": {
+        "browse": "Parcourir",
+        "search": "Rechercher",
+        "howItWorks": "Comment ça marche",
+        "login": "Connexion",
+        "signUp": "S'inscrire",
+        "dashboard": "Tableau de bord",
+        "admin": "Admin",
+        "tests": "Tests",
+        "verdicts": "Verdicts",
+        "promotions": "Promotions"
+    }
+}

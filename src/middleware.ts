@@ -26,13 +26,17 @@ export default auth((req) => {
         '/search' // Added search and browse to public
     ];
 
+    // List of all supported locales for matching
+    const locales = ['en', 'ja', 'es', 'fr', 'de', 'it', 'pt', 'zh', 'hi', 'ru', 'ko'];
+    const localePattern = locales.join('|');
+
     const publicPathnameRegex = RegExp(
-        `^(/(${['en', 'ja'].join('|')}))?(${publicPages.join('|').replace(/\//g, '\\/')})/?$`,
+        `^(/(${localePattern}))?(${publicPages.join('|').replace(/\//g, '\\/')})/?$`,
         'i'
     );
 
-    // Explicitly allow root locale paths (userId: /en, /ja) which the regex might miss if checking for trailing /
-    const isRootLocale = /^\/(en|ja)$/.test(nextUrl.pathname);
+    // Explicitly allow root locale paths (userId: /en, /ja...) 
+    const isRootLocale = new RegExp(`^/(${localePattern})$`).test(nextUrl.pathname);
 
     const isPublicRoute = isRootLocale || publicPathnameRegex.test(nextUrl.pathname) || nextUrl.pathname.startsWith('/api/');
 

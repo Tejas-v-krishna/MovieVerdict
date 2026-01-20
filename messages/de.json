@@ -1,0 +1,18 @@
+{
+    "HomePage": {
+        "title": "MovieVerdict",
+        "subtitle": "Vertrauensbasierte Filmurteile"
+    },
+    "Navigation": {
+        "browse": "Durchsuchen",
+        "search": "Suche",
+        "howItWorks": "Wie es funktioniert",
+        "login": "Anmelden",
+        "signUp": "Registrieren",
+        "dashboard": "Dashboard",
+        "admin": "Admin",
+        "tests": "Tests",
+        "verdicts": "Urteile",
+        "promotions": "Werbeaktionen"
+    }
+}

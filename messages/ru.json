@@ -1,0 +1,18 @@
+{
+    "HomePage": {
+        "title": "MovieVerdict",
+        "subtitle": "Вердикты фильмов, основанные на доверии"
+    },
+    "Navigation": {
+        "browse": "Обзор",
+        "search": "Поиск",
+        "howItWorks": "Как это работает",
+        "login": "Войти",
+        "signUp": "Регистрация",
+        "dashboard": "Панель",
+        "admin": "Админ",
+        "tests": "Тесты",
+        "verdicts": "Вердикты",
+        "promotions": "Промоакции"
+    }
+}

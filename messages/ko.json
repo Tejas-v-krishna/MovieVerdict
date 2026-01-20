@@ -1,0 +1,18 @@
+{
+    "HomePage": {
+        "title": "MovieVerdict",
+        "subtitle": "신뢰 기반 영화 판결"
+    },
+    "Navigation": {
+        "browse": "살펴보기",
+        "search": "검색",
+        "howItWorks": "작동 방식",
+        "login": "로그인",
+        "signUp": "가입하기",
+        "dashboard": "대시보드",
+        "admin": "관리자",
+        "tests": "테스트",
+        "verdicts": "판결",
+        "promotions": "홍보"
+    }
+}
