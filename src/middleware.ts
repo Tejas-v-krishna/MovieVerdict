@@ -1,12 +1,9 @@
 import { auth } from "@/lib/auth"
 import createMiddleware from "next-intl/middleware"
 import { NextResponse } from "next/server"
+import { routing } from "./navigation"
 
-const intlMiddleware = createMiddleware({
-    locales: ['en', 'ja'],
-    defaultLocale: 'en',
-    localePrefix: 'always'
-});
+const intlMiddleware = createMiddleware(routing);
 
 export default auth((req) => {
     const { nextUrl } = req;

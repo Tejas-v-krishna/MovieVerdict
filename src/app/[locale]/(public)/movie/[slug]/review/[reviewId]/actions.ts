@@ -20,7 +20,7 @@ export async function addReviewComment(reviewId: string, formData: FormData) {
     });
 
     if (!result.success) {
-        return { error: result.error.errors[0].message };
+        return { error: result.error.issues[0].message };
     }
 
     const { body } = result.data;
