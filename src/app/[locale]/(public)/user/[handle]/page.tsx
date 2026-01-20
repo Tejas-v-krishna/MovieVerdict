@@ -36,7 +36,12 @@ export default async function UserProfilePage({ params }: UserProfileProps) {
             createdLists: {
                 where: { isPublic: true },
                 orderBy: { createdAt: "desc" },
-                include: {
+                select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    description: true,
+                    createdAt: true,
                     _count: { select: { items: true } }
                 }
             },
@@ -140,7 +145,7 @@ export default async function UserProfilePage({ params }: UserProfileProps) {
                         <h2 className="text-2xl font-bold">Curated Lists</h2>
                         <div className="grid gap-6 md:grid-cols-2">
                             {user.createdLists.map((list) => (
-                                <Link key={list.id} href={`/list/${list.slug}`} className="block group">
+                                <Link key={list.id} href={`/list/${(list as any).slug}`} className="block group">
                                     <div className="p-6 border rounded-lg bg-card hover:border-primary transition-colors">
                                         <h3 className="font-bold text-lg group-hover:underline">{list.title}</h3>
                                         <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
