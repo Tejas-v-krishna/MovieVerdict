@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 export async function approveReviewAction(formData: FormData) {
     const session = await auth();
 
-    if (!session || (session.user.role !== "CORE_REVIEWER" && session.user.role !== "ADMIN")) {
+    if (!session?.user || (session.user.role !== "CORE_REVIEWER" && session.user.role !== "ADMIN")) {
         throw new Error("Unauthorized");
     }
 
@@ -39,7 +39,7 @@ export async function approveReviewAction(formData: FormData) {
 export async function rejectReviewAction(formData: FormData) {
     const session = await auth();
 
-    if (!session || (session.user.role !== "CORE_REVIEWER" && session.user.role !== "ADMIN")) {
+    if (!session?.user || (session.user.role !== "CORE_REVIEWER" && session.user.role !== "ADMIN")) {
         throw new Error("Unauthorized");
     }
 

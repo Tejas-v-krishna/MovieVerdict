@@ -30,7 +30,7 @@ export async function canCreateReview(movieId: string, userId: string): Promise<
  * Parse review content to extract spoilers
  */
 export function parseSpoilers(content: string): { hasSpoilers: boolean } {
-    const spoilerRegex = /\[SPOILER\](.*?)\[\/SPOILER\]/gs;
+    const spoilerRegex = /\[SPOILER\]([\s\S]*?)\[\/SPOILER\]/g;
     return {
         hasSpoilers: spoilerRegex.test(content),
     };
