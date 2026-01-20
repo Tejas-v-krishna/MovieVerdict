@@ -87,3 +87,28 @@ export async function getUserLists(userId: string) {
         }
     });
 }
+
+export async function getMyLists() {
+    const session = await auth();
+    if (!session) return [];
+    return getUserLists(session.user.id!);
+}
+
+export async function removeMovieFromList(listId: string, movieId: string) {
+    const session = await auth();
+    if (!session) return { error: "Login required" };
+
+    const list = await prisma.curatedList.findUnique({ where: { id: listId } });
+    if (!list) return { error: "List not found" };
+    if (list.createdById !== session.user.id) return { error: "Unauthorized" };
+
+    await prisma.curatedListItem.deleteMany({
+        where: {
+            listId,
+            movieId
+        }
+    });
+
+    revalidatePath(`/list/${list.slug}`);
+    return { success: true };
+}
