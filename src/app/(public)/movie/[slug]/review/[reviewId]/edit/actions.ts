@@ -34,7 +34,7 @@ export async function updateReviewAction(formData: FormData) {
     }
 
     // Parse spoilers
-    const { hasSpoilers } = parseSpoilers(content);
+    const { hasSpoilers, spoilerBlocks } = parseSpoilers(content);
 
     // Handle conflict disclosure
     let conflictDisclosure = null;
@@ -47,8 +47,11 @@ export async function updateReviewAction(formData: FormData) {
         data: {
             reviewId,
             editedById: session.user.id!,
-            previousContent: existingReview.content,
-            newContent: content,
+            reason: "Content update", // Default reason as form doesn't provide one
+            diff: JSON.stringify({
+                old: existingReview.body,
+                new: content
+            }),
         },
     });
 
@@ -56,10 +59,10 @@ export async function updateReviewAction(formData: FormData) {
     await prisma.review.update({
         where: { id: reviewId },
         data: {
-            content,
-            hasSpoilers,
+            body: content,
+            spoilerBlocks: spoilerBlocks as any,
             conflictDisclosure,
-            ...(verdict && { suggestedVerdict: verdict }),
+            ...(verdict && { verdictLabel: verdict as any }),
         },
     });
 

@@ -43,9 +43,9 @@ export function ReviewCard({ review }: ReviewCardProps) {
             </div>
 
             {/* Suggested Verdict (if any) */}
-            {review.suggestedVerdict && (
+            {review.verdictLabel && (
                 <div className="text-sm text-muted-foreground">
-                    Suggested Verdict: <strong>{review.suggestedVerdict.replace('_', '+')}</strong>
+                    Suggested Verdict: <strong>{review.verdictLabel.replace('_', '+')}</strong>
                 </div>
             )}
         </div>

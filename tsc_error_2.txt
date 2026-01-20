@@ -1,0 +1,4 @@
+﻿src/app/(public)/movie/[slug]/review/[reviewId]/edit/actions.ts(63,13): error TS2322: Type 'any[] | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+  Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/(public)/movie/[slug]/review/new/actions.ts(51,13): error TS2322: Type 'any[] | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+  Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.

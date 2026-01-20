@@ -39,7 +39,24 @@ export default async function MoviePage({ params }: MoviePageProps) {
         if (tmdbIdMatch) {
             const tmdbId = parseInt(tmdbIdMatch[1]);
             try {
-                movie = await fetchAndCacheMovie(tmdbId);
+                const cached = await fetchAndCacheMovie(tmdbId);
+                movie = await prisma.movie.findUnique({
+                    where: { id: cached.id },
+                    include: {
+                        reviews: {
+                            where: { visibility: "PUBLIC", status: "PUBLISHED" },
+                            include: { author: { select: { name: true, handle: true } } },
+                            orderBy: { createdAt: "desc" },
+                        },
+                        verdictHistory: {
+                            include: {
+                                requestedBy: { select: { name: true, handle: true } },
+                                approvedBy: { select: { name: true, handle: true } },
+                            },
+                            orderBy: { createdAt: "desc" },
+                        },
+                    },
+                });
             } catch (error) {
                 console.error("Failed to fetch movie:", error);
                 notFound();
@@ -47,6 +64,10 @@ export default async function MoviePage({ params }: MoviePageProps) {
         } else {
             notFound();
         }
+    }
+
+    if (!movie) {
+        notFound();
     }
 
     // Get test status for current user

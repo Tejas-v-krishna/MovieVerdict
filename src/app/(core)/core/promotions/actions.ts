@@ -27,7 +27,7 @@ export async function approveReviewAction(formData: FormData) {
     await prisma.promotionVote.create({
         data: {
             reviewId,
-            voterId: session.user.id!,
+            coreReviewerId: session.user.id!,
             vote: "APPROVE",
         },
     });
@@ -49,7 +49,7 @@ export async function rejectReviewAction(formData: FormData) {
     await prisma.promotionVote.create({
         data: {
             reviewId,
-            voterId: session.user.id!,
+            coreReviewerId: session.user.id!,
             vote: "REJECT",
         },
     });

@@ -22,7 +22,7 @@ export async function changeUserRoleAction(formData: FormData) {
 
     await prisma.user.update({
         where: { id: userId },
-        data: { role: newRole },
+        data: { role: newRole as any },
     });
 
     // Create audit log
@@ -60,7 +60,7 @@ export async function banUserAction(formData: FormData) {
     await prisma.ban.create({
         data: {
             userId,
-            bannedById: session.user.id!,
+            createdByAdminId: session.user.id!,
             reason,
             expiresAt,
         },

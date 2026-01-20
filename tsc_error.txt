@@ -1,0 +1,4 @@
+﻿src/app/(public)/movie/[slug]/review/[reviewId]/edit/actions.ts(63,65): error TS2339: Property 'spoilerBlocks' does not exist on type '{ hasSpoilers: boolean; }'.
+src/app/(public)/movie/[slug]/review/new/actions.ts(50,21): error TS2367: This comparison appears to be unintentional because the types '"PUBLISHED" | "PENDING"' and '"DRAFT"' have no overlap.
+src/app/(public)/movie/[slug]/review/new/actions.ts(51,65): error TS2339: Property 'spoilerBlocks' does not exist on type '{ hasSpoilers: boolean; }'.
+src/components/domain/ReviewCard.tsx(46,21): error TS2339: Property 'suggestedVerdict' does not exist on type '{ id: string; movieId: string; authorId: string; visibility: ReviewVisibility; status: ReviewStatus; verdictLabel: Verdict; body: string; spoilerBlocks: JsonValue; conflictDisclosure: string | null; promotedById: string | null; createdAt: Date; updatedAt: Date; } & { ...; }'.

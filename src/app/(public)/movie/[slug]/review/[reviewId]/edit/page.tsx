@@ -53,7 +53,7 @@ export default async function EditReviewPage({ params }: EditReviewPageProps) {
                             <h2 className="font-semibold">Verdict</h2>
                             <select
                                 name="verdict"
-                                defaultValue={review.suggestedVerdict || ""}
+                                defaultValue={review.verdictLabel || ""}
                                 className="w-full px-3 py-2 border border-input rounded-md"
                             >
                                 <option value="">-- No verdict --</option>
@@ -79,7 +79,7 @@ export default async function EditReviewPage({ params }: EditReviewPageProps) {
                             name="content"
                             required
                             rows={15}
-                            defaultValue={review.content}
+                            defaultValue={review.body}
                             className="w-full px-3 py-2 border border-input rounded-md font-mono text-sm"
                         />
                     </div>

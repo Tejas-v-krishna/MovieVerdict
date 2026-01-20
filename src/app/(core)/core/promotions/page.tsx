@@ -15,7 +15,7 @@ export default async function PromotionsPage() {
     const pendingReviews = await prisma.review.findMany({
         where: {
             visibility: "PRIVATE",
-            status: "DRAFT",
+            status: "PENDING",
         },
         include: {
             author: { select: { name: true, handle: true } },
@@ -72,7 +72,7 @@ export default async function PromotionsPage() {
 
                                 {/* Review Content */}
                                 <div className="p-4 bg-muted rounded">
-                                    <p className="whitespace-pre-wrap text-sm">{review.content}</p>
+                                    <p className="whitespace-pre-wrap text-sm">{review.body}</p>
                                 </div>
 
                                 {/* Actions */}

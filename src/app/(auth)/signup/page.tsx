@@ -13,7 +13,7 @@ export default function SignupPage() {
                     </p>
                 </div>
 
-                <form action={signupAction} className="space-y-4">
+                <form action={signupAction as any} className="space-y-4">
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium mb-1">
                             Email

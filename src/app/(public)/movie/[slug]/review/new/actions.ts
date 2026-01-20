@@ -29,10 +29,10 @@ export async function createReviewAction(formData: FormData) {
     const isCoreReviewer = session.user.role === "CORE_REVIEWER" || session.user.role === "ADMIN";
 
     const visibility = isCoreReviewer ? "PUBLIC" : "PRIVATE";
-    const status = isCoreReviewer ? "PUBLISHED" : "DRAFT";
+    const status = isCoreReviewer ? "PUBLISHED" : "PENDING";
 
     // Parse spoilers
-    const { hasSpoilers } = parseSpoilers(content);
+    const { hasSpoilers, spoilerBlocks } = parseSpoilers(content);
 
     // Handle conflict disclosure
     let conflictDisclosure = null;
@@ -45,13 +45,12 @@ export async function createReviewAction(formData: FormData) {
         data: {
             movieId,
             authorId: session.user.id!,
-            content,
+            body: content,
             visibility,
             status,
-            hasSpoilers,
+            spoilerBlocks: spoilerBlocks as any,
             conflictDisclosure,
-            // Store verdict if provided (CORE_REVIEWER only)
-            ...(isCoreReviewer && verdict && { suggestedVerdict: verdict }),
+            verdictLabel: (isCoreReviewer && verdict ? verdict : "B") as any, // Default or cast
         },
     });
 

@@ -40,7 +40,7 @@ export default async function DashboardPage() {
     let pendingReviewsCount = 0;
     if (session.user.role === "CORE_REVIEWER" || session.user.role === "ADMIN") {
         pendingReviewsCount = await prisma.review.count({
-            where: { visibility: "PRIVATE", status: "DRAFT" },
+            where: { visibility: "PRIVATE", status: "PENDING" },
         });
     }
 

@@ -108,7 +108,7 @@ export default async function AdminDashboardPage() {
                                     <div>
                                         <p className="font-medium">{audit.action.replace('_', ' ')}</p>
                                         <p className="text-muted-foreground text-xs">
-                                            by @{audit.actor.handle} • {audit.targetType} {audit.targetId.slice(0, 8)}
+                                            by {audit.actor ? `@${audit.actor.handle}` : 'System'} • {audit.targetType} {audit.targetId.slice(0, 8)}
                                         </p>
                                     </div>
                                     <p className="text-xs text-muted-foreground">

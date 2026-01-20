@@ -22,7 +22,7 @@ export async function proposeVerdictAction(formData: FormData) {
         data: {
             movieId,
             fromVerdict: null, // Will be set on approval
-            toVerdict: newVerdict,
+            toVerdict: newVerdict as any,
             shortVerdict,
             reason: reasoning,
             requestedById: session.user.id!,

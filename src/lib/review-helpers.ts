@@ -29,9 +29,37 @@ export async function canCreateReview(movieId: string, userId: string): Promise<
 /**
  * Parse review content to extract spoilers
  */
-export function parseSpoilers(content: string): { hasSpoilers: boolean } {
+export function parseSpoilers(content: string): { hasSpoilers: boolean; spoilerBlocks: any[] | null } {
     const spoilerRegex = /\[SPOILER\]([\s\S]*?)\[\/SPOILER\]/g;
+    const hasSpoilers = spoilerRegex.test(content);
+
+    // Simple block parsing: text, spoiler, text...
+    const blocks = [];
+    let lastIndex = 0;
+    let match;
+
+    // Reset regex state
+    spoilerRegex.lastIndex = 0;
+
+    while ((match = spoilerRegex.exec(content)) !== null) {
+        // Text before spoiler
+        if (match.index > lastIndex) {
+            blocks.push({ type: 'text', content: content.slice(lastIndex, match.index) });
+        }
+
+        // Spoiler content
+        blocks.push({ type: 'spoiler', content: match[1] });
+
+        lastIndex = spoilerRegex.lastIndex;
+    }
+
+    // Remaining text
+    if (lastIndex < content.length) {
+        blocks.push({ type: 'text', content: content.slice(lastIndex) });
+    }
+
     return {
-        hasSpoilers: spoilerRegex.test(content),
+        hasSpoilers,
+        spoilerBlocks: hasSpoilers ? blocks : null,
     };
 }
