@@ -37,6 +37,17 @@ export async function toggleFollow(targetUserId: string, pathname: string) {
                     followingId: targetUserId
                 }
             });
+
+            // Create Notification
+            await prisma.notification.create({
+                data: {
+                    userId: targetUserId,
+                    type: "FOLLOW",
+                    title: "New Follower",
+                    message: `${session.user.name ?? "Someone"} started following you.`,
+                    link: `/user/${session.user.handle ?? userId}`
+                }
+            });
         }
 
         revalidatePath(pathname);

@@ -109,6 +109,7 @@ model User {
 
   followedBy       Follows[] @relation("following")
   following        Follows[] @relation("follower")
+  notifications    Notification[]
 
   // NextAuth
   accounts Account[]
@@ -439,6 +440,25 @@ model Follows {
   createdAt   DateTime @default(now())
 
   @@id([followerId, followingId])
+}
+
+enum NotificationType {
+  FOLLOW
+  VERDICT_UPDATE
+  REVIEW_LIKE
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String?
+  link      String?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
 }
 
 model VerificationToken {
