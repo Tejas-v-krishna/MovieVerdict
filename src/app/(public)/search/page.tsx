@@ -1,5 +1,6 @@
 import { searchMovies } from "@/lib/tmdb";
 import { MovieCard } from "@/components/domain/MovieCard";
+import { SearchForm } from "@/components/domain/SearchForm";
 import prisma from "@/lib/db";
 
 interface SearchPageProps {
@@ -14,10 +15,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         return (
             <div className="min-h-screen p-8">
                 <div className="max-w-7xl mx-auto">
-                    <h1 className="text-3xl font-bold">Search Movies</h1>
-                    <p className="text-muted-foreground mt-4">
-                        Enter a search query to find movies
-                    </p>
+                    <h1 className="text-3xl font-bold mb-6">Search Movies</h1>
+                    <SearchForm />
                 </div>
             </div>
         );
@@ -65,7 +64,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <div className="min-h-screen p-8">
             <div className="max-w-7xl mx-auto space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold">Search Results for &quot;{query}&quot;</h1>
+                    <h1 className="text-3xl font-bold mb-6">Search Results for &quot;{query}&quot;</h1>
+                    <div className="mb-8">
+                        <SearchForm />
+                    </div>
                     <p className="text-muted-foreground mt-1">
                         Found {results.total_results} results
                     </p>
