@@ -124,6 +124,7 @@ model ReviewerProfile {
   bio          String?
   avatarUrl    String?
   identityType IdentityType @default(PSEUDO)
+  badges       String[]     @default([])
 }
 
 model Movie {

@@ -51,6 +51,10 @@ export async function toggleFollow(targetUserId: string, pathname: string) {
         }
 
         revalidatePath(pathname);
+
+        // Check for badges asynchronously (fire and forget)
+        import("@/lib/gamification").then(mod => mod.checkAndAwardBadges(targetUserId));
+
         return { success: true, isFollowing: !existing };
     } catch (error) {
         console.error("Follow error:", error);

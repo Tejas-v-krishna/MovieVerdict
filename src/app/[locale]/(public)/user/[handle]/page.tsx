@@ -99,6 +99,11 @@ export default async function UserProfilePage({ params }: UserProfileProps) {
                     <div className="flex-1 text-center md:text-left space-y-2">
                         <div className="flex flex-col md:flex-row items-center gap-4">
                             <h1 className="text-3xl font-bold">{user.reviewerProfile?.displayName || user.name}</h1>
+                            {user.reviewerProfile?.badges.map(badge => (
+                                <span key={badge} className="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full border border-yellow-200 font-medium">
+                                    {badge}
+                                </span>
+                            ))}
                             {!isOwner && session && (
                                 <FollowButton
                                     targetUserId={user.id}
