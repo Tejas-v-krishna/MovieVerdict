@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"; // Need to ensure Textarea exists
 import { addPublicComment } from "@/lib/actions/comment";
 import { usePathname } from "@/navigation";
-import { formatDate } from "@/lib/utils"; // Assume util exists or standard JS
+// import { formatDate } from "@/lib/utils"; // Removed unused import
 import { Link } from "@/navigation";
 
 interface CommentSectionProps {

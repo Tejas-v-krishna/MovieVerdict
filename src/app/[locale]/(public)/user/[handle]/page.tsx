@@ -29,7 +29,7 @@ export default async function UserProfilePage({ params }: UserProfileProps) {
                 orderBy: { createdAt: "desc" },
                 include: {
                     movie: true,
-                    author: { select: { name: true, handle: true } }
+                    author: { select: { id: true, name: true, handle: true } }
                 },
                 take: 10
             },

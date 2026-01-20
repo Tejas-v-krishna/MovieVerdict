@@ -2,6 +2,7 @@ import { Link } from "@/navigation";
 import type { Review, User, Movie } from "@prisma/client";
 import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SpoilerText } from "./SpoilerText";
 
 interface ReviewCardProps {
     review: Review & {

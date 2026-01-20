@@ -21,7 +21,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
         include: {
             reviews: {
                 where: { visibility: "PUBLIC", status: "PUBLISHED" },
-                include: { author: { select: { name: true, handle: true } } },
+                include: { author: { select: { id: true, name: true, handle: true } } },
                 orderBy: { createdAt: "desc" },
             },
             verdictHistory: {
@@ -49,7 +49,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                     include: {
                         reviews: {
                             where: { visibility: "PUBLIC", status: "PUBLISHED" },
-                            include: { author: { select: { name: true, handle: true } } },
+                            include: { author: { select: { id: true, name: true, handle: true } } },
                             orderBy: { createdAt: "desc" },
                         },
                         verdictHistory: {
