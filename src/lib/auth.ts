@@ -81,12 +81,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     events: {
         async createUser({ user }) {
-            await prisma.reviewerProfile.create({
-                data: {
-                    userId: user.id!,
-                    displayName: user.name || "Reviewer",
-                },
-            });
+            try {
+                await prisma.reviewerProfile.create({
+                    data: {
+                        userId: user.id!,
+                        displayName: user.name || "Reviewer",
+                    },
+                });
+            } catch (error) {
+                console.error("Failed to auto-create reviewer profile:", error);
+                // process.exit(1); // Do not exit, just log. Allow login to proceed.
+            }
         },
     },
     debug: true, // Enable debugging to see errors in logs
