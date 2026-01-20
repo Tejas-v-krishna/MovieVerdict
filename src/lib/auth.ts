@@ -79,4 +79,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return session;
         },
     },
+    events: {
+        async createUser({ user }) {
+            await prisma.reviewerProfile.create({
+                data: {
+                    userId: user.id!,
+                    displayName: user.name || "Reviewer",
+                },
+            });
+        },
+    },
+    debug: true, // Enable debugging to see errors in logs
 });
