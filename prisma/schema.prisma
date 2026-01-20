@@ -153,15 +153,19 @@ model VerdictHistory {
   movieId String
   movie   Movie  @relation(fields: [movieId], references: [id])
 
-  fromLabel Verdict?
-  toLabel   Verdict
+  fromVerdict Verdict?
+  toVerdict   Verdict
+  shortVerdict String?
   reason    String
+
+  status    String   @default("PENDING")
 
   requestedById String
   requestedBy   User   @relation("VerdictRequestUser", fields: [requestedById], references: [id])
 
   approvedById String?
   approvedBy   User?   @relation("VerdictApproveUser", fields: [approvedById], references: [id])
+  approvedAt   DateTime?
 
   createdAt DateTime @default(now())
 }
