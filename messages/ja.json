@@ -9,6 +9,10 @@
         "howItWorks": "仕組み",
         "login": "ログイン",
         "signUp": "登録",
-        "dashboard": "ダッシュボード"
+        "dashboard": "ダッシュボード",
+        "admin": "管理",
+        "tests": "テスト",
+        "verdicts": "判定提案",
+        "promotions": "昇格審査"
     }
 }

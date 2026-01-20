@@ -9,6 +9,10 @@
         "howItWorks": "How It Works",
         "login": "Login",
         "signUp": "Sign Up",
-        "dashboard": "Dashboard"
+        "dashboard": "Dashboard",
+        "admin": "Admin",
+        "tests": "Tests",
+        "verdicts": "Verdicts",
+        "promotions": "Promotions"
     }
 }

@@ -1,36 +1,12 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { SiteHeader } from "@/components/ui/site-header";
+import { ReactNode } from "react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "MovieVerdict - Trust-First Movie Verdicts",
-  description: "Knowledge-gated movie reviews and verdicts",
-};
-
+// Since we have a root `[locale]` layout, this root layout
+// just passes through to it (via middleware match).
+// However, Next.js needs a root layout file.
 export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <SiteHeader />
-        {children}
-      </body>
-    </html>
-  );
+    children,
+}: {
+    children: ReactNode;
+}) {
+    return children;
 }

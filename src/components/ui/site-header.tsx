@@ -1,8 +1,15 @@
-import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { Button } from "./button";
+import { Link } from "@/navigation";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "./lang-switcher";
 
-export async function SiteHeader() {
+export function SiteHeader() {
+    const t = useTranslations('Navigation');
+    return <AuthAwareHeader t={t} />;
+}
+
+async function AuthAwareHeader({ t }: { t: any }) {
     const session = await auth();
 
     return (
@@ -15,41 +22,43 @@ export async function SiteHeader() {
                     </Link>
 
                     {/* Navigation */}
-                    <nav className="flex items-center gap-6">
+                    <nav className="flex items-center gap-4">
                         <Link href="/browse/movies" className="text-sm hover:text-primary">
-                            Browse
+                            {t('browse')}
                         </Link>
                         <Link href="/search" className="text-sm hover:text-primary">
-                            Search
+                            {t('search')}
                         </Link>
                         <Link href="/how-trust-works" className="text-sm hover:text-primary">
-                            How It Works
+                            {t('howItWorks')}
                         </Link>
+
+                        <LanguageSwitcher />
 
                         {/* Auth */}
                         {session ? (
                             <>
                                 {session.user.role === "ADMIN" && (
                                     <>
-                                        <Link href="/admin/users" className="text-sm hover:text-primary">
-                                            Admin
+                                        <Link href="/admin/users" className="text-sm hover:text-primary hidden md:inline-block">
+                                            {t('admin')}
                                         </Link>
-                                        <Link href="/admin/tests" className="text-sm hover:text-primary">
-                                            Tests
+                                        <Link href="/admin/tests" className="text-sm hover:text-primary hidden md:inline-block">
+                                            {t('tests')}
                                         </Link>
-                                        <Link href="/admin/verdict-proposals" className="text-sm hover:text-primary">
-                                            Verdicts
+                                        <Link href="/admin/verdict-proposals" className="text-sm hover:text-primary hidden md:inline-block">
+                                            {t('verdicts')}
                                         </Link>
                                     </>
                                 )}
                                 {(session.user.role === "CORE_REVIEWER" || session.user.role === "ADMIN") && (
-                                    <Link href="/core/promotions" className="text-sm hover:text-primary">
-                                        Promotions
+                                    <Link href="/core/promotions" className="text-sm hover:text-primary hidden md:inline-block">
+                                        {t('promotions')}
                                     </Link>
                                 )}
                                 <Link href="/me">
                                     <Button variant="outline" size="sm">
-                                        Dashboard
+                                        {t('dashboard')}
                                     </Button>
                                 </Link>
                             </>
@@ -57,12 +66,12 @@ export async function SiteHeader() {
                             <>
                                 <Link href="/login">
                                     <Button variant="ghost" size="sm">
-                                        Login
+                                        {t('login')}
                                     </Button>
                                 </Link>
                                 <Link href="/signup">
                                     <Button size="sm">
-                                        Sign Up
+                                        {t('signUp')}
                                     </Button>
                                 </Link>
                             </>
