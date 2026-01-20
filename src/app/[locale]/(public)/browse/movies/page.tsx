@@ -1,60 +1,85 @@
-import { getTrendingMovies } from "@/lib/tmdb";
 import { MovieCard } from "@/components/domain/MovieCard";
 import prisma from "@/lib/db";
+import { Prisma } from "@prisma/client";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/navigation";
+import { FilterSidebar } from "./FilterSidebar";
 
-export default async function BrowseMoviesPage() {
-    let trending;
-    try {
-        trending = await getTrendingMovies();
-    } catch (e) {
-        return (
-            <div className="min-h-screen p-8">
-                <div className="max-w-7xl mx-auto text-center space-y-4">
-                    <h1 className="text-3xl font-bold">Configuration Needed</h1>
-                    <p className="text-muted-foreground">
-                        Failed to fetch movies. Please check your TMDB API Key in .env file.
-                    </p>
-                </div>
-            </div>
-        );
+interface BrowseProps {
+    searchParams: {
+        verdict?: string;
+        genre?: string;
+        year?: string;
+    }
+}
+
+export default async function BrowseMoviesPage({ searchParams }: BrowseProps) {
+    const verdictFilter = searchParams.verdict ? searchParams.verdict.split(',') : [];
+    const genreFilter = searchParams.genre ? searchParams.genre.split(',') : [];
+    const yearFilter = searchParams.year ? parseInt(searchParams.year) : undefined;
+
+    // Prisma Query Construction
+    const where: Prisma.MovieWhereInput = {};
+
+    if (verdictFilter.length > 0) {
+        where.currentVerdict = { in: verdictFilter as any };
     }
 
-    // Check which movies exist in our DB
-    const tmdbIds = trending.results.map(m => m.id);
-    const existingMovies = await prisma.movie.findMany({
-        where: { tmdbId: { in: tmdbIds } },
-        select: { tmdbId: true, slug: true, currentVerdict: true },
-    });
+    if (genreFilter.length > 0) {
+        where.genres = { hasSome: genreFilter };
+    }
 
-    const moviesMap = new Map(existingMovies.map(m => [m.tmdbId, m]));
+    if (yearFilter) {
+        where.year = yearFilter;
+    }
 
-    const movies = trending.results.map(tmdbMovie => {
-        const dbMovie = moviesMap.get(tmdbMovie.id);
-        return {
-            slug: dbMovie?.slug || `${tmdbMovie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${tmdbMovie.id}`,
-            title: tmdbMovie.title,
-            year: new Date(tmdbMovie.release_date).getFullYear(),
-            posterUrl: tmdbMovie.poster_path
-                ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}`
-                : null,
-            currentVerdict: dbMovie?.currentVerdict,
-        };
+    // Always fetch from DB now to allow filtering
+    const movies = await prisma.movie.findMany({
+        where,
+        orderBy: [
+            { updatedAt: 'desc' }, // Recently updated/reviewed
+            { createdAt: 'desc' }
+        ],
+        take: 50
     });
 
     return (
         <div className="min-h-screen p-8">
             <div className="max-w-7xl mx-auto space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold">Trending Movies</h1>
+                    <h1 className="text-3xl font-bold">Browse Movies</h1>
                     <p className="text-muted-foreground mt-1">
-                        Popular movies this week from TMDB
+                        Explore verdicts and reviews from the community.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                    {movies.map((movie) => (
-                        <MovieCard key={movie.slug} movie={movie} />
-                    ))}
+                <div className="flex flex-col md:flex-row gap-8">
+                    {/* Sidebar Filters */}
+                    <aside className="w-full md:w-64 flex-shrink-0">
+                        <FilterSidebar
+                            currentVerdict={verdictFilter}
+                            currentGenre={genreFilter}
+                            currentYear={searchParams.year}
+                        />
+                    </aside>
+
+                    {/* Results Grid */}
+                    <div className="flex-1">
+                        {movies.length === 0 ? (
+                            <div className="text-center py-12 border border-dashed rounded-lg">
+                                <p className="text-muted-foreground mb-4">No movies match your filters.</p>
+                                <Link href="/browse/movies">
+                                    <Button variant="outline">Clear Filters</Button>
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                                {movies.map((movie) => (
+                                    <MovieCard key={movie.id} movie={movie} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
