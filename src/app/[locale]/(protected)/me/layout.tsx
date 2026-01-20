@@ -1,6 +1,6 @@
 import { Link } from "@/navigation";
 import { Button } from "@/components/ui/button";
-import { User, Heart, Settings, FileText } from "lucide-react";
+import { User, Heart, Settings, FileText, List } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export default function DashboardLayout({
@@ -25,6 +25,12 @@ export default function DashboardLayout({
                         <Button variant="ghost" className="w-full justify-start gap-2">
                             <Heart className="h-4 w-4" />
                             Watchlist
+                        </Button>
+                    </Link>
+                    <Link href="/me/lists">
+                        <Button variant="ghost" className="w-full justify-start gap-2">
+                            <List className="h-4 w-4" />
+                            My Lists
                         </Button>
                     </Link>
                     <Link href="/me/reviews">

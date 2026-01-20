@@ -29,9 +29,16 @@ export default async function UserProfilePage({ params }: UserProfileProps) {
                 orderBy: { createdAt: "desc" },
                 include: {
                     movie: true,
-                    author: { select: { name: true, handle: true } } // needed for card?
+                    author: { select: { name: true, handle: true } }
                 },
                 take: 10
+            },
+            createdLists: {
+                where: { isPublic: true },
+                orderBy: { createdAt: "desc" },
+                include: {
+                    _count: { select: { items: true } }
+                }
             },
             followedBy: {
                 where: { followerId: session?.user?.id ?? "0" }
@@ -86,6 +93,30 @@ export default async function UserProfilePage({ params }: UserProfileProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* Curated Lists */}
+                {user.createdLists.length > 0 && (
+                    <div className="space-y-6">
+                        <h2 className="text-2xl font-bold">Curated Lists</h2>
+                        <div className="grid gap-6 md:grid-cols-2">
+                            {user.createdLists.map((list) => (
+                                <Link key={list.id} href={`/list/${list.slug}`} className="block group">
+                                    <div className="p-6 border rounded-lg bg-card hover:border-primary transition-colors">
+                                        <h3 className="font-bold text-lg group-hover:underline">{list.title}</h3>
+                                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                            {list.description || "No description"}
+                                        </p>
+                                        <div className="mt-4 flex items-center text-xs text-muted-foreground">
+                                            <span>{list._count.items} movies</span>
+                                            <span className="mx-2">•</span>
+                                            <span>{new Date(list.createdAt).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Recent Reviews */}
                 <div className="space-y-6">
