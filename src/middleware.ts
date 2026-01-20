@@ -31,7 +31,10 @@ export default auth((req) => {
         'i'
     );
 
-    const isPublicRoute = publicPathnameRegex.test(nextUrl.pathname) || nextUrl.pathname.startsWith('/api/');
+    // Explicitly allow root locale paths (userId: /en, /ja) which the regex might miss if checking for trailing /
+    const isRootLocale = /^\/(en|ja)$/.test(nextUrl.pathname);
+
+    const isPublicRoute = isRootLocale || publicPathnameRegex.test(nextUrl.pathname) || nextUrl.pathname.startsWith('/api/');
 
     // Redirect to login if accessing protected route while not logged in
     if (!isPublicRoute && !isLoggedIn) {
