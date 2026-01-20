@@ -1,29 +1,45 @@
-import { SpoilerText } from "./SpoilerText";
-import type { Review, User } from "@prisma/client";
+import { Link } from "@/navigation";
+import type { Review, User, Movie } from "@prisma/client";
+import { MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ReviewCardProps {
     review: Review & {
-        author: Pick<User, "name" | "handle">;
+        author: Pick<User, "id" | "name" | "handle">;
     };
+    movie?: Movie;
+    hideActions?: boolean;
+    expanded?: boolean;
 }
 
-export function ReviewCard({ review }: ReviewCardProps) {
+export function ReviewCard({ review, movie, hideActions = false, expanded = false }: ReviewCardProps) {
     return (
         <div className="p-6 border border-border rounded-md space-y-4">
-            {/* Author */}
-            <div className="flex justify-between items-start">
-                <div>
-                    <p className="font-medium">
-                        {review.author.name || review.author.handle}
-                    </p>
+            {/* Header with Movie Title if expanded or in list context */}
+            {(expanded || movie) && (
+                <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                        {movie && !expanded && (
+                            <Link href={`/movie/${movie.slug}`} className="font-bold hover:underline mb-1 block">
+                                {movie.title} ({movie.year})
+                            </Link>
+                        )}
+                        <Link href={`/user/${review.author.handle || review.author.id}`} className="flex items-center gap-2 group">
+                            <span className="font-medium group-hover:underline">
+                                {review.author.name || review.author.handle}
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                                @{review.author.handle}
+                            </span>
+                        </Link>
+                    </div>
                     <p className="text-sm text-muted-foreground">
-                        @{review.author.handle}
+                        {new Date(review.createdAt).toLocaleDateString()}
                     </p>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                    {new Date(review.createdAt).toLocaleDateString()}
-                </p>
-            </div>
+            )}
+
+            {/* ... Content ... */}
 
             {/* Conflict Disclosure */}
             {review.conflictDisclosure && (
@@ -34,7 +50,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
             )}
 
             {/* Review Content */}
-            <div className="prose max-w-none">
+            <div className="prose max-w-none text-foreground">
                 {review.spoilerBlocks ? (
                     <SpoilerText content={review.body} />
                 ) : (
@@ -42,25 +58,24 @@ export function ReviewCard({ review }: ReviewCardProps) {
                 )}
             </div>
 
-            {/* Suggested Verdict (if any) */}
+            {/* Verdict */}
             {review.verdictLabel && (
-                <div className="text-sm text-muted-foreground">
-                    Suggested Verdict: <strong>{review.verdictLabel.replace('_', '+')}</strong>
+                <div className="text-sm text-muted-foreground mt-2">
+                    Verdict: <span className="font-bold text-foreground">{review.verdictLabel.replace('_', '+')}</span>
                 </div>
             )}
 
             {/* Footer Actions */}
-            <div className="border-t border-border pt-4 flex justify-end">
-                <a
-                    href={`/movie/${review.movieId}/review/${review.id}`} // We assume standard URL structure or pass locale from parent? 
-                    // Actually, straight anchor is fine but we should use proper Link if possible. 
-                    // But ReviewCard is used in many places. 
-                    // Let's use simple anchor for now, Next js intercepts it mostly or full reload is acceptable.
-                    className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
-                >
-                    View Discussion & Details →
-                </a>
-            </div>
+            {!hideActions && (
+                <div className="border-t border-border pt-4 flex gap-4">
+                    <Link href={`/review/${review.id}`}>
+                        <Button variant="ghost" size="sm" className="gap-2">
+                            <MessageSquare className="h-4 w-4" />
+                            Discuss
+                        </Button>
+                    </Link>
+                </div>
+            )}
         </div>
     );
 }

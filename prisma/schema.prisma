@@ -447,6 +447,7 @@ enum NotificationType {
   VERDICT_UPDATE
   REVIEW_LIKE
   SYSTEM
+  COMMENT_ON_REVIEW
 }
 
 model Notification {
