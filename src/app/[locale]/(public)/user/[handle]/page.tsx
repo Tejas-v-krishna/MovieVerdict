@@ -48,14 +48,49 @@ export default async function UserProfilePage({ params }: UserProfileProps) {
 
     if (!user) notFound();
 
-    const isFollowing = user.followedBy.length > 0;
     const isOwner = session?.user?.id === user.id;
+
+    // Calculate Compatibility
+    let compatibility: number | null = null;
+    let commonMoviesCount = 0;
+
+    if (session?.user?.id && !isOwner) {
+        const myReviews = await prisma.review.findMany({
+            where: {
+                authorId: session.user.id,
+                verdictLabel: { not: undefined } // Ensure verdict exists roughly
+            },
+            select: { movieId: true, verdictLabel: true }
+        });
+
+        const theirReviews = await prisma.review.findMany({
+            where: {
+                authorId: user.id,
+                verdictLabel: { not: undefined }
+            },
+            select: { movieId: true, verdictLabel: true }
+        });
+
+        const { calculateCompatibilityScore } = await import("@/lib/compatibility");
+        compatibility = calculateCompatibilityScore(myReviews as any, theirReviews as any); // Type assertion if needed
+
+        // Count common just for display info
+        const myMovieIds = new Set(myReviews.map(r => r.movieId));
+        commonMoviesCount = theirReviews.filter(r => myMovieIds.has(r.movieId)).length;
+    }
 
     return (
         <div className="min-h-screen p-8">
             <div className="max-w-4xl mx-auto space-y-8">
                 {/* Header Profile Card */}
-                <div className="bg-card border rounded-lg p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
+                <div className="bg-card border rounded-lg p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 relative">
+                    {/* Compatibility Badge */}
+                    {compatibility !== null && (
+                        <div className="absolute top-4 right-4 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold border border-primary/20" title={`Based on ${commonMoviesCount} shared movies`}>
+                            {compatibility}% Taste Match
+                        </div>
+                    )}
+
                     <Avatar className="h-24 w-24 md:h-32 md:w-32">
                         <AvatarImage src={user.reviewerProfile?.avatarUrl || user.image || ""} />
                         <AvatarFallback className="text-2xl">{user.name?.[0]}</AvatarFallback>
