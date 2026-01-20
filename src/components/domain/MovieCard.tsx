@@ -5,7 +5,7 @@ import { AddToListButton } from "./AddToListButton";
 
 interface MovieCardProps {
     movie: {
-        id: string; // Added ID
+        id?: string; // Added ID, but optional for search results that might lack it initially
         slug: string;
         title: string;
         year: number;
@@ -33,9 +33,11 @@ export function MovieCard({ movie }: MovieCardProps) {
                 </Link>
 
                 {/* Overlay Action */}
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <AddToListButton movieId={movie.id} />
-                </div>
+                {movie.id && (
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <AddToListButton movieId={movie.id} />
+                    </div>
+                )}
             </div>
 
             <div>

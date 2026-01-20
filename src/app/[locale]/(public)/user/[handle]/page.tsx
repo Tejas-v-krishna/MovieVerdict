@@ -104,10 +104,10 @@ export default async function UserProfilePage({ params }: UserProfileProps) {
                                     {badge}
                                 </span>
                             ))}
-                            {!isOwner && session && (
+                            {!isOwner && session && user.followedBy && (
                                 <FollowButton
                                     targetUserId={user.id}
-                                    initialIsFollowing={isFollowing}
+                                    initialIsFollowing={user.followedBy.length > 0}
                                 />
                             )}
                         </div>
