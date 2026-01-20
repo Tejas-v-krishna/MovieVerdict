@@ -18,7 +18,7 @@ export default async function AdminDashboardPage() {
         totalMovies: await prisma.movie.count(),
         totalTests: await prisma.test.count(),
         pendingVerdicts: await prisma.verdictHistory.count({ where: { status: "PENDING" } }),
-        pendingReviews: await prisma.review.count({ where: { visibility: "PRIVATE", status: "DRAFT" } }),
+        pendingReviews: await prisma.review.count({ where: { visibility: "PRIVATE", status: "PENDING" } }),
         activeTests: await prisma.test.count({ where: { status: "ACTIVE" } }),
     };
 

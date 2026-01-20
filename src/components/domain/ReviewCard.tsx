@@ -35,10 +35,10 @@ export function ReviewCard({ review }: ReviewCardProps) {
 
             {/* Review Content */}
             <div className="prose max-w-none">
-                {review.hasSpoilers ? (
-                    <SpoilerText content={review.content} />
+                {review.spoilerBlocks ? (
+                    <SpoilerText content={review.body} />
                 ) : (
-                    <p className="whitespace-pre-wrap">{review.content}</p>
+                    <p className="whitespace-pre-wrap">{review.body}</p>
                 )}
             </div>
 

@@ -11,7 +11,7 @@ export function SpoilerText({ content }: SpoilerTextProps) {
 
     // Parse spoilers and regular text
     const parts: Array<{ type: "text" | "spoiler"; content: string; index?: number }> = [];
-    const spoilerRegex = /\[SPOILER\](.*?)\[\/SPOILER\]/gs;
+    const spoilerRegex = /\[SPOILER\]([\s\S]*?)\[\/SPOILER\]/g;
 
     let lastIndex = 0;
     let match;
@@ -61,8 +61,8 @@ export function SpoilerText({ content }: SpoilerTextProps) {
                         type="button"
                         onClick={() => toggleSpoiler(part.index!)}
                         className={`inline-block px-2 py-1 mx-1 rounded transition ${isRevealed
-                                ? "bg-muted text-foreground"
-                                : "bg-black text-black hover:bg-gray-800 hover:text-gray-200 cursor-pointer"
+                            ? "bg-muted text-foreground"
+                            : "bg-black text-black hover:bg-gray-800 hover:text-gray-200 cursor-pointer"
                             }`}
                         title={isRevealed ? "Click to hide spoiler" : "Click to reveal spoiler"}
                     >
