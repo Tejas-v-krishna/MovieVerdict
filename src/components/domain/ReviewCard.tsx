@@ -48,6 +48,19 @@ export function ReviewCard({ review }: ReviewCardProps) {
                     Suggested Verdict: <strong>{review.verdictLabel.replace('_', '+')}</strong>
                 </div>
             )}
+
+            {/* Footer Actions */}
+            <div className="border-t border-border pt-4 flex justify-end">
+                <a
+                    href={`/movie/${review.movieId}/review/${review.id}`} // We assume standard URL structure or pass locale from parent? 
+                    // Actually, straight anchor is fine but we should use proper Link if possible. 
+                    // But ReviewCard is used in many places. 
+                    // Let's use simple anchor for now, Next js intercepts it mostly or full reload is acceptable.
+                    className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+                >
+                    View Discussion & Details →
+                </a>
+            </div>
         </div>
     );
 }
