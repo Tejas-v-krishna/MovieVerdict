@@ -10,9 +10,13 @@ if (!TMDB_API_KEY) {
 }
 
 async function tmdbFetch<T>(endpoint: string): Promise<T> {
-    const url = `${TMDB_BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_API_KEY}`;
+    const url = `${TMDB_BASE_URL}${endpoint}`;
 
     const response = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${TMDB_API_KEY}`,
+            'Content-Type': 'application/json',
+        },
         next: { revalidate: 3600 }, // Cache for 1 hour
     });
 
