@@ -1,0 +1,14 @@
+{
+    "HomePage": {
+        "title": "MovieVerdict",
+        "subtitle": "Trust-First Movie Verdicts"
+    },
+    "Navigation": {
+        "browse": "Browse",
+        "search": "Search",
+        "howItWorks": "How It Works",
+        "login": "Login",
+        "signUp": "Sign Up",
+        "dashboard": "Dashboard"
+    }
+}

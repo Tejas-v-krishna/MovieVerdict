@@ -1,0 +1,14 @@
+{
+    "HomePage": {
+        "title": "MovieVerdict",
+        "subtitle": "信頼第一の映画判定"
+    },
+    "Navigation": {
+        "browse": "閲覧",
+        "search": "検索",
+        "howItWorks": "仕組み",
+        "login": "ログイン",
+        "signUp": "登録",
+        "dashboard": "ダッシュボード"
+    }
+}
