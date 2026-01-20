@@ -8,15 +8,9 @@ import { Input } from "@/components/ui/input"; // Need Input
 import { Textarea } from "@/components/ui/textarea"; // Need Textarea
 import { useRouter } from "@/navigation";
 
-// Placeholder for Input/Textarea if they don't exist, but they likely do or I use basic HTML
-function SimpleInput(props: any) {
-    return <input {...props} className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${props.className}`} />
-}
-function SimpleTextarea(props: any) {
-    return <textarea {...props} className={`flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${props.className}`} />
-}
-// I will blindly assume standard components are missing strictly and use standard HTML with classes to be safe, 
-// OR I should have checked. But the user said "continue". I'll use simple HTML to be safe and fast.
+// Imports already present or need to be added?
+// I commented them out or didn't add them. I should ensure they are imported.
+
 
 export function CreateListButton() {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -64,7 +58,7 @@ export function CreateListButton() {
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label className="text-sm font-medium">Title</label>
-                    <SimpleInput
+                    <Input
                         value={title}
                         onChange={(e: any) => setTitle(e.target.value)}
                         placeholder="e.g. Cyberpunk Essentials"
@@ -73,7 +67,7 @@ export function CreateListButton() {
                 </div>
                 <div>
                     <label className="text-sm font-medium">Description</label>
-                    <SimpleTextarea
+                    <Textarea
                         value={desc}
                         onChange={(e: any) => setDesc(e.target.value)}
                         placeholder="What's this list about?"
