@@ -1,0 +1,402 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  VIEWER
+  NON_CORE_MEMBER
+  CORE_REVIEWER
+  ADMIN
+}
+
+enum Verdict {
+  S_PLUS
+  S
+  A
+  B
+  C
+}
+
+enum IdentityType {
+  REAL
+  PSEUDO
+}
+
+enum ReviewVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum ReviewStatus {
+  PUBLISHED
+  PENDING
+  REJECTED
+}
+
+enum PromotionVoteValue {
+  APPROVE
+  REJECT
+}
+
+enum TestStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  ARCHIVED
+}
+
+enum QuestionType {
+  MCQ
+}
+
+enum RequestStatus {
+  OPEN
+  ANSWERED
+  CLOSED
+}
+
+enum ReportTargetType {
+  REVIEW
+  USER
+  COMMENT
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(VIEWER)
+  handle        String?   @unique
+  locale        String    @default("en")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  reviewerProfile ReviewerProfile?
+
+  reviews         Review[]
+  editedReviews   ReviewEdit[]
+  votes           PromotionVote[]
+  createdLists    CuratedList[]
+  testAttempts    TestAttempt[]
+  reviewRequests  ReviewRequest[]
+  requestMessages ReviewRequestMessage[]
+  reports         Report[]
+  bans            Ban[]
+
+  // Audits
+  audits           AuditLog[]
+  verdictHistory   VerdictHistory[] @relation("VerdictRequestUser")
+  verdictApprovals VerdictHistory[] @relation("VerdictApproveUser")
+
+  reviewPromotions Review[] @relation("ReviewPromoter")
+
+  // NextAuth
+  accounts Account[]
+  sessions Session[]
+}
+
+model ReviewerProfile {
+  id           String       @id @default(cuid())
+  userId       String       @unique
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName  String
+  bio          String?
+  avatarUrl    String?
+  identityType IdentityType @default(PSEUDO)
+}
+
+model Movie {
+  id            String   @id @default(cuid())
+  tmdbId        Int      @unique
+  slug          String   @unique
+  title         String
+  originalTitle String?
+  year          Int
+  synopsis      String?
+  posterUrl     String?
+  backdropUrl   String?
+  runtime       Int?
+  languages     String[]
+  genres        String[]
+
+  currentVerdict      Verdict?
+  currentShortVerdict String?
+  verdictUpdatedAt    DateTime?
+
+  reviews        Review[]
+  verdictHistory VerdictHistory[]
+  tests          Test[]
+  listItems      CuratedListItem[]
+  reviewRequests ReviewRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerdictHistory {
+  id      String @id @default(cuid())
+  movieId String
+  movie   Movie  @relation(fields: [movieId], references: [id])
+
+  fromLabel Verdict?
+  toLabel   Verdict
+  reason    String
+
+  requestedById String
+  requestedBy   User   @relation("VerdictRequestUser", fields: [requestedById], references: [id])
+
+  approvedById String?
+  approvedBy   User?   @relation("VerdictApproveUser", fields: [approvedById], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id      String @id @default(cuid())
+  movieId String
+  movie   Movie  @relation(fields: [movieId], references: [id])
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  visibility ReviewVisibility @default(PRIVATE)
+  status     ReviewStatus     @default(PENDING)
+
+  verdictLabel  Verdict
+  body          String
+  spoilerBlocks Json?
+
+  conflictDisclosure String?
+
+  promotedById String?
+  promotedBy   User?   @relation("ReviewPromoter", fields: [promotedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  edits          ReviewEdit[]
+  promotionVotes PromotionVote[]
+}
+
+model ReviewEdit {
+  id       String @id @default(cuid())
+  reviewId String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  editedById String
+  editedBy   User   @relation(fields: [editedById], references: [id])
+
+  reason String
+  diff   String
+
+  createdAt DateTime @default(now())
+}
+
+model PromotionVote {
+  id       String @id @default(cuid())
+  reviewId String
+  review   Review @relation(fields: [reviewId], references: [id])
+
+  coreReviewerId String
+  coreReviewer   User   @relation(fields: [coreReviewerId], references: [id])
+
+  vote PromotionVoteValue
+  note String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, coreReviewerId])
+}
+
+model Test {
+  id      String @id @default(cuid())
+  movieId String
+  movie   Movie  @relation(fields: [movieId], references: [id])
+
+  version Int
+  status  TestStatus @default(DRAFT)
+
+  createdById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions TestQuestion[]
+  attempts  TestAttempt[]
+}
+
+model TestQuestion {
+  id     String @id @default(cuid())
+  testId String
+  test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  type         QuestionType @default(MCQ)
+  prompt       String
+  options      String[]
+  correctIndex Int
+  explanation  String?
+}
+
+model TestAttempt {
+  id     String @id @default(cuid())
+  testId String
+  test   Test   @relation(fields: [testId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  score  Int
+  passed Boolean
+
+  startedAt   DateTime
+  completedAt DateTime?
+}
+
+model CuratedList {
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  description String?
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  isPublic Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items CuratedListItem[]
+}
+
+model CuratedListItem {
+  id     String      @id @default(cuid())
+  listId String
+  list   CuratedList @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  movieId String
+  movie   Movie  @relation(fields: [movieId], references: [id])
+
+  note  String?
+  order Int
+}
+
+model ReviewRequest {
+  id String @id @default(cuid())
+
+  requesterId String
+  requester   User   @relation(fields: [requesterId], references: [id])
+
+  movieId String
+  movie   Movie  @relation(fields: [movieId], references: [id])
+
+  prompt String
+  status RequestStatus @default(OPEN)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages ReviewRequestMessage[]
+}
+
+model ReviewRequestMessage {
+  id        String        @id @default(cuid())
+  requestId String
+  request   ReviewRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id         String @id @default(cuid())
+  reporterId String
+  reporter   User   @relation(fields: [reporterId], references: [id])
+
+  targetType ReportTargetType
+  targetId   String
+  reason     String
+  status     ReportStatus     @default(OPEN)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ban {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  reason           String
+  createdByAdminId String?
+
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+}
+
+model AuditLog {
+  id      String  @id @default(cuid())
+  actorId String?
+  actor   User?   @relation(fields: [actorId], references: [id])
+
+  action     String
+  targetType String
+  targetId   String
+  metadata   Json?
+
+  createdAt DateTime @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
