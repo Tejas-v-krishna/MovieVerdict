@@ -38,11 +38,24 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         );
     }
 
+    const { auth } = await import("@/lib/auth");
+    const session = await auth();
+    const userId = session?.user?.id;
+
     // Check which movies exist in our DB
     const tmdbIds = results.results.map(m => m.id);
     const existingMovies = await prisma.movie.findMany({
         where: { tmdbId: { in: tmdbIds } },
-        select: { tmdbId: true, slug: true, currentVerdict: true },
+        select: {
+            id: true,
+            tmdbId: true,
+            slug: true,
+            currentVerdict: true,
+            watchlist: userId ? {
+                where: { userId },
+                select: { movieId: true } // just check existence
+            } : false
+        },
     });
 
     const moviesMap = new Map(existingMovies.map(m => [m.tmdbId, m]));
@@ -57,6 +70,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}`
                 : null,
             currentVerdict: dbMovie?.currentVerdict,
+            isWatchlisted: dbMovie?.watchlist && dbMovie.watchlist.length > 0
         };
     });
 
@@ -80,7 +94,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                         {movies.map((movie) => (
-                            <MovieCard key={movie.slug} movie={movie} />
+                            <MovieCard
+                                key={movie.slug}
+                                movie={movie}
+                                isWatchlisted={movie.isWatchlisted}
+                            />
                         ))}
                     </div>
                 )}

@@ -11,6 +11,9 @@ interface ListPageProps {
 }
 
 export default async function ListPage({ params }: ListPageProps) {
+    const session = await auth();
+    const userId = session?.user?.id;
+
     const list = await prisma.curatedList.findUnique({
         where: { slug: params.slug },
         include: {
@@ -20,7 +23,14 @@ export default async function ListPage({ params }: ListPageProps) {
             items: {
                 orderBy: { order: 'asc' },
                 include: {
-                    movie: true
+                    movie: {
+                        include: {
+                            watchlist: userId ? {
+                                where: { userId },
+                                select: { movieId: true }
+                            } : false
+                        }
+                    }
                 }
             }
         }

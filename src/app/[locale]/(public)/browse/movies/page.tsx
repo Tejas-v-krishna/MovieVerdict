@@ -33,6 +33,10 @@ export default async function BrowseMoviesPage({ searchParams }: BrowseProps) {
         where.year = yearFilter;
     }
 
+    const { auth } = await import("@/lib/auth");
+    const session = await auth();
+    const userId = session?.user?.id;
+
     // Always fetch from DB now to allow filtering
     const movies = await prisma.movie.findMany({
         where,
@@ -40,7 +44,12 @@ export default async function BrowseMoviesPage({ searchParams }: BrowseProps) {
             { updatedAt: 'desc' }, // Recently updated/reviewed
             { createdAt: 'desc' }
         ],
-        take: 50
+        take: 50,
+        include: {
+            watchlist: userId ? {
+                where: { userId }
+            } : false
+        }
     });
 
     return (
@@ -75,7 +84,11 @@ export default async function BrowseMoviesPage({ searchParams }: BrowseProps) {
                         ) : (
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                                 {movies.map((movie) => (
-                                    <MovieCard key={movie.id} movie={movie} />
+                                    <MovieCard
+                                        key={movie.id}
+                                        movie={movie}
+                                        isWatchlisted={movie.watchlist && movie.watchlist.length > 0}
+                                    />
                                 ))}
                             </div>
                         )}

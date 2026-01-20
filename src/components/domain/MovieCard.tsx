@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Movie } from "@prisma/client";
 import { getPosterUrl } from "@/lib/tmdb";
 import { AddToListButton } from "./AddToListButton";
+import { CardWatchlistButton } from "./CardWatchlistButton";
 
 interface MovieCardProps {
     movie: {
@@ -12,9 +13,10 @@ interface MovieCardProps {
         posterUrl: string | null;
         currentVerdict?: Movie["currentVerdict"];
     };
+    isWatchlisted?: boolean;
 }
 
-export function MovieCard({ movie }: MovieCardProps) {
+export function MovieCard({ movie, isWatchlisted = false }: MovieCardProps) {
     return (
         <div className="space-y-2 group relative">
             <div className="aspect-[2/3] bg-muted rounded-md overflow-hidden relative">
@@ -32,10 +34,11 @@ export function MovieCard({ movie }: MovieCardProps) {
                     )}
                 </Link>
 
-                {/* Overlay Action */}
+                {/* Overlay Actions */}
                 {movie.id && (
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2">
                         <AddToListButton movieId={movie.id} />
+                        <CardWatchlistButton movieId={movie.id} initialIsWatchlisted={isWatchlisted} />
                     </div>
                 )}
             </div>
