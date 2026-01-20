@@ -105,6 +105,7 @@ model User {
 
   reviewComments   ReviewComment[]
   reviewPromotions Review[] @relation("ReviewPromoter")
+  watchlist        Watchlist[]
 
   // NextAuth
   accounts Account[]
@@ -141,6 +142,7 @@ model Movie {
 
   reviews        Review[]
   verdictHistory VerdictHistory[]
+  watchlist      Watchlist[]
   tests          Test[]
   listItems      CuratedListItem[]
   reviewRequests ReviewRequest[]
@@ -226,6 +228,16 @@ model ReviewComment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Watchlist {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movieId   String
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, movieId])
 }
 
 model PromotionVote {

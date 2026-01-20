@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { getUserTestStatus } from "@/lib/test-helpers";
 import { ReviewCard } from "@/components/domain/ReviewCard";
+import { WatchlistButton } from "@/components/domain/WatchlistButton";
 
 interface MoviePageProps {
     params: { slug: string };
@@ -30,6 +31,9 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 },
                 orderBy: { createdAt: "desc" },
             },
+            watchlist: {
+                where: { userId: session?.user?.id ?? "0" }
+            }
         },
     });
 
@@ -55,6 +59,9 @@ export default async function MoviePage({ params }: MoviePageProps) {
                             },
                             orderBy: { createdAt: "desc" },
                         },
+                        watchlist: {
+                            where: { userId: session?.user?.id ?? "0" }
+                        }
                     },
                 });
             } catch (error) {
@@ -142,6 +149,18 @@ export default async function MoviePage({ params }: MoviePageProps) {
                                 {movie.runtime && <span>{movie.runtime} min</span>}
                                 {movie.genres.length > 0 && (
                                     <span>{movie.genres.slice(0, 3).join(', ')}</span>
+                                )}
+                            </div>
+
+                            {/* Watchlist & Meta Actions */}
+                            <div className="flex gap-4 items-center">
+                                {session && (
+                                    <WatchlistButton
+                                        movieId={movie.id}
+                                        initialIsWatchlisted={
+                                            movie.watchlist?.length > 0
+                                        }
+                                    />
                                 )}
                             </div>
 
