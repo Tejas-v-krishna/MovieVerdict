@@ -1,78 +1,74 @@
-import { Button } from "@/components/ui/button";
+import { SearchForm } from "@/components/domain/SearchForm";
+import { getPosterUrl, getNowPlayingMovies, getUpcomingMovies } from "@/lib/tmdb";
+import { HeroBanner } from "@/components/home/HeroBanner";
+import { MovieCarousel } from "@/components/home/MovieCarousel";
+import { NewsSection } from "@/components/home/NewsSection";
 import { Link } from "@/navigation";
-import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
-export default function Home() {
-  const t = useTranslations("HomePage");
-  const tNav = useTranslations("Navigation");
+// Force dynamic since we're fetching "Now Playing" which changes
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  // Parallel fetch for speed
+  const [nowPlaying, upcoming] = await Promise.all([
+    getNowPlayingMovies(),
+    getUpcomingMovies()
+  ]);
+
+  const nowPlayingMovies = nowPlaying.results?.map(m => ({
+    id: m.id,
+    title: m.title,
+    posterUrl: getPosterUrl(m.poster_path),
+    releaseDate: m.release_date
+  })) || [];
+
+  const upcomingMovies = upcoming.results?.map(m => ({
+    id: m.id,
+    title: m.title,
+    posterUrl: getPosterUrl(m.poster_path),
+    releaseDate: m.release_date
+  })) || [];
 
   return (
-    <main className="min-h-screen">
-      {/* Hero */}
-      <div className="flex flex-col items-center justify-center p-8 min-h-[60vh]">
-        <div className="max-w-2xl mx-auto text-center space-y-8">
-          <h1 className="text-5xl font-bold tracking-tight">
-            {t("title")}
-          </h1>
+    <main className="min-h-screen bg-background">
 
-          <p className="text-xl text-muted-foreground">
-            {t("subtitle")}
-          </p>
+      {/* 1. Hero Section */}
+      <HeroBanner />
 
-          <div className="flex gap-4 justify-center">
-            <Link href="/browse/movies">
-              <Button size="lg">
-                {tNav("browse")}
-              </Button>
-            </Link>
-            <Link href="/search">
-              <Button variant="outline" size="lg">
-                {tNav("search")}
-              </Button>
-            </Link>
-          </div>
-
-          <div className="pt-12 text-sm text-muted-foreground space-y-2">
-            <p className="opacity-80">Movies reviewed by verified cinephiles.</p>
-            <p className="opacity-80">Earn trust through knowledge, not influence.</p>
+      {/* 2. Global Search Bar (Fandango Style - prominent strip) */}
+      <div className="bg-primary py-4 sticky top-0 z-20 shadow-md">
+        <div className="max-w-3xl mx-auto px-4 flex gap-2">
+          <div className="flex-1">
+            <SearchForm className="w-full bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/70" />
           </div>
         </div>
       </div>
 
-      {/* Features */}
-      <div className="border-t border-border bg-muted/30">
-        <div className="max-w-6xl mx-auto p-8">
-          <h2 className="text-2xl font-bold mb-8 text-center">{tNav("howItWorks")}</h2>
+      <div className="space-y-4 pb-12">
+        {/* 3. Movies In Theaters */}
+        <MovieCarousel
+          title="Movies in Theaters"
+          linkUrl="/browse/now-playing"
+          movies={nowPlayingMovies}
+        />
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="space-y-3">
-              <h3 className="font-semibold text-lg">1. Pass Factual Tests</h3>
-              <p className="text-sm text-muted-foreground">
-                Prove you&#39;ve watched a movie by passing a knowledge test.
-              </p>
-            </div>
+        {/* 4. Coming Soon */}
+        <MovieCarousel
+          title="Coming Soon to Theaters"
+          linkUrl="/browse/upcoming"
+          movies={upcomingMovies}
+        />
 
-            <div className="space-y-3">
-              <h3 className="font-semibold text-lg">2. Write Reviews</h3>
-              <p className="text-sm text-muted-foreground">
-                Share thoughtful analysis. Private reviews are promoted based on quality.
-              </p>
-            </div>
+        {/* 5. News Section */}
+        <NewsSection />
 
-            <div className="space-y-3">
-              <h3 className="font-semibold text-lg">3. Trust-Based Verdicts</h3>
-              <p className="text-sm text-muted-foreground">
-                No ratings. Clear verdicts answering: &quot;Is this worth watching?&quot;
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 text-center">
-            <Link href="/how-trust-works" className="text-primary hover:underline">
-              {tNav("howItWorks")} →
-            </Link>
-          </div>
-        </div>
+        {/* 6. Watch At Home (Reuse Now Playing for demo, but typically different data) */}
+        <MovieCarousel
+          title="Watch at Home"
+          linkUrl="/browse/streaming"
+          movies={nowPlayingMovies.slice().reverse()}
+        />
       </div>
     </main>
   );

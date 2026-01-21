@@ -43,6 +43,14 @@ export async function getMovieDetails(tmdbId: number): Promise<TMDBMovieDetails>
     return tmdbFetch<TMDBMovieDetails>(`/movie/${tmdbId}?append_to_response=credits`);
 }
 
+export async function getNowPlayingMovies(page = 1): Promise<TMDBSearchResponse> {
+    return tmdbFetch<TMDBSearchResponse>(`/movie/now_playing?page=${page}&region=US`);
+}
+
+export async function getUpcomingMovies(page = 1): Promise<TMDBSearchResponse> {
+    return tmdbFetch<TMDBSearchResponse>(`/movie/upcoming?page=${page}&region=US`);
+}
+
 /**
  * Fetch movie from TMDB and cache in database
  */

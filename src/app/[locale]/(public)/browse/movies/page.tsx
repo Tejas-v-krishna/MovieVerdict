@@ -6,17 +6,18 @@ import { Link } from "@/navigation";
 import { FilterSidebar } from "./FilterSidebar";
 
 interface BrowseProps {
-    searchParams: {
+    searchParams: Promise<{
         verdict?: string;
         genre?: string;
         year?: string;
-    }
+    }>
 }
 
 export default async function BrowseMoviesPage({ searchParams }: BrowseProps) {
-    const verdictFilter = searchParams.verdict ? searchParams.verdict.split(',') : [];
-    const genreFilter = searchParams.genre ? searchParams.genre.split(',') : [];
-    const yearFilter = searchParams.year ? parseInt(searchParams.year) : undefined;
+    const params = await searchParams;
+    const verdictFilter = params.verdict ? params.verdict.split(',') : [];
+    const genreFilter = params.genre ? params.genre.split(',') : [];
+    const yearFilter = params.year ? parseInt(params.year) : undefined;
 
     // Prisma Query Construction
     const where: Prisma.MovieWhereInput = {};
@@ -68,7 +69,7 @@ export default async function BrowseMoviesPage({ searchParams }: BrowseProps) {
                         <FilterSidebar
                             currentVerdict={verdictFilter}
                             currentGenre={genreFilter}
-                            currentYear={searchParams.year}
+                            currentYear={params.year}
                         />
                     </aside>
 
