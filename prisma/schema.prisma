@@ -111,6 +111,9 @@ model User {
   following        Follows[] @relation("follower")
   notifications    Notification[]
 
+  onboardingCompleted Boolean @default(false)
+  preferences         Json?
+
   // NextAuth
   accounts Account[]
   sessions Session[]

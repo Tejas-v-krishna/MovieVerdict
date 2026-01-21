@@ -28,8 +28,9 @@ async function AuthAwareHeader({ t }: { t: any }) {
             <div className="max-w-7xl mx-auto px-6 py-4">
                 <div className="flex justify-between items-center">
                     {/* Logo */}
-                    <Link href="/" className="text-xl font-bold">
-                        MovieVerdict
+                    {/* Logo */}
+                    <Link href="/" className="flex items-center">
+                        <img src="/logo.png" alt="MovieVerdict" className="h-4 md:h-6 w-auto object-contain" />
                     </Link>
 
                     {/* Navigation */}
