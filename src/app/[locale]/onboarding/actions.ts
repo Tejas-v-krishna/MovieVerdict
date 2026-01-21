@@ -1,12 +1,11 @@
 "use server";
 
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // Adjust import path if needed
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export async function checkOnboardingStatus() {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
         return false; // Assume false if not auth, effectively logic handled by client
     }
@@ -20,7 +19,7 @@ export async function checkOnboardingStatus() {
 }
 
 export async function saveOnboardingPreferences(data: any) {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
         return { error: "Not authenticated" };
     }
@@ -43,7 +42,7 @@ export async function saveOnboardingPreferences(data: any) {
 }
 
 export async function completeOnboarding() {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
         return { error: "Not authenticated" };
     }
