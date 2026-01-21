@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { checkOnboardingStatus } from "@/app/[locale]/onboarding/actions";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -28,7 +29,17 @@ export default function LoginPage() {
             if (result?.error) {
                 setError(result.error);
             } else {
-                router.push("/me");
+                // Check onboarding status
+                try {
+                    const isCompleted = await checkOnboardingStatus();
+                    if (isCompleted) {
+                        router.push("/me");
+                    } else {
+                        router.push("/onboarding");
+                    }
+                } catch (e) {
+                    router.push("/me"); // Fallback
+                }
                 router.refresh();
             }
         } catch (err) {

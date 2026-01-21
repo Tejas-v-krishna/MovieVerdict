@@ -59,5 +59,5 @@ export async function completeOnboarding() {
         return { error: "Failed to complete onboarding" };
     }
 
-    redirect("/");
+    redirect("/me");
 }

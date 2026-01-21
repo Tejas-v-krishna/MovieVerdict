@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { saveOnboardingPreferences, completeOnboarding } from "@/app/[locale]/onboarding/actions";
+import { ChevronRight, Check } from "lucide-react";
 
 // --- Types ---
 type OnboardingData = {
@@ -14,8 +15,7 @@ type OnboardingData = {
     preferred_genres: string[];
     taste_factors: string[];
     preferred_industries: string[];
-    preferred_languages: string[];
-    review_style_preferences: string[];
+    review_style_preferences: string[]; // Fixed name
     spoiler_tolerance: string;
 };
 
@@ -26,21 +26,44 @@ const INITIAL_DATA: OnboardingData = {
     preferred_genres: [],
     taste_factors: [],
     preferred_industries: [],
-    preferred_languages: [],
     review_style_preferences: [],
     spoiler_tolerance: "",
 };
 
-// --- Step Components ---
+// --- Styled Components ---
 
-const StepHeader = ({ title, subtitle }: { title: string; subtitle: string }) => (
-    <div className="mb-8 text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
-        <p className="text-muted-foreground text-lg">{subtitle}</p>
+const StepContainer = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div className={cn("w-full max-w-2xl bg-white/80 backdrop-blur-md shadow-xl rounded-3xl p-8 sm:p-12 border border-white/20", className)}>
+        {children}
     </div>
 );
 
-const MultiSelect = ({
+const OptionButton = ({
+    selected,
+    onClick,
+    children,
+}: {
+    selected: boolean;
+    onClick: () => void;
+    children: React.ReactNode;
+}) => (
+    <button
+        onClick={onClick}
+        className={cn(
+            "w-full text-left px-6 py-4 rounded-xl text-lg font-medium transition-all duration-200 border-2",
+            selected
+                ? "border-primary bg-primary/5 text-foreground shadow-sm"
+                : "border-transparent bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground"
+        )}
+    >
+        <div className="flex items-center justify-between">
+            <span>{children}</span>
+            {selected && <Check className="w-5 h-5 text-primary" />}
+        </div>
+    </button>
+);
+
+const MultiSelectOptions = ({
     options,
     selected,
     onChange,
@@ -49,12 +72,13 @@ const MultiSelect = ({
     selected: string[];
     onChange: (value: string[]) => void;
 }) => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="flex flex-col gap-3">
         {options.map((option) => {
             const isSelected = selected.includes(option);
             return (
-                <button
+                <OptionButton
                     key={option}
+                    selected={isSelected}
                     onClick={() => {
                         if (isSelected) {
                             onChange(selected.filter((item) => item !== option));
@@ -62,45 +86,39 @@ const MultiSelect = ({
                             onChange([...selected, option]);
                         }
                     }}
-                    className={cn(
-                        "p-4 rounded-xl border text-left transition-all duration-200",
-                        isSelected
-                            ? "border-primary bg-primary/10 text-primary font-medium"
-                            : "border-border hover:border-primary/50 hover:bg-muted/50"
-                    )}
                 >
                     {option}
-                </button>
+                </OptionButton>
             );
         })}
     </div>
 );
 
-const SingleSelect = ({
+const SingleSelectOptions = ({
     options,
     selected,
     onChange,
+    autoAdvance,
 }: {
     options: string[];
     selected: string;
     onChange: (value: string) => void;
+    autoAdvance?: () => void;
 }) => (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
         {options.map((option) => {
             const isSelected = selected === option;
             return (
-                <button
+                <OptionButton
                     key={option}
-                    onClick={() => onChange(option)}
-                    className={cn(
-                        "w-full p-4 rounded-xl border text-left transition-all duration-200",
-                        isSelected
-                            ? "border-primary bg-primary/10 text-primary font-medium"
-                            : "border-border hover:border-primary/50 hover:bg-muted/50"
-                    )}
+                    selected={isSelected}
+                    onClick={() => {
+                        onChange(option);
+                        if (autoAdvance) setTimeout(autoAdvance, 300);
+                    }}
                 >
                     {option}
-                </button>
+                </OptionButton>
             );
         })}
     </div>
@@ -113,10 +131,9 @@ export function OnboardingFlow() {
     const [data, setData] = useState<OnboardingData>(INITIAL_DATA);
     const [loading, setLoading] = useState(false);
 
-    const totalSteps = 6;
+    const totalSteps = 8; // Excluding final screen
 
     const saveData = async (newData: OnboardingData) => {
-        // Persist incrementally
         await saveOnboardingPreferences(newData);
     };
 
@@ -129,15 +146,12 @@ export function OnboardingFlow() {
 
     const handleComplete = async () => {
         setLoading(true);
-        await saveData(data); // one last save
+        await saveData(data);
         await completeOnboarding();
-        // Server action redirects, so we don't need to unset loading really
     };
 
     const skipStep = async () => {
         setLoading(true);
-        // Persist current state even if incomplete for that step? Or just move on.
-        // Prompt says "skip for now", imply just don't validate and move on.
         await saveData(data);
         setStep((prev) => prev + 1);
         setLoading(false);
@@ -145,181 +159,184 @@ export function OnboardingFlow() {
 
     // --- Steps Content ---
 
-    const renderStep = () => {
+    const renderContent = () => {
         switch (step) {
-            case 1: // Intent
+            case 1:
                 return (
-                    <motion.div
-                        key="step1"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                    >
-                        <StepHeader
-                            title="What brings you here?"
-                            subtitle="Help us understand your goals."
-                        />
-                        <MultiSelect
+                    <>
+                        <h1 className="text-3xl font-bold mb-2">What brings you here?</h1>
+                        <p className="text-muted-foreground text-lg mb-8">Select all that apply.</p>
+                        <MultiSelectOptions
                             options={[
-                                "Decide if a movie is worth watching",
-                                "Avoid wasting time on bad movies",
-                                "Discover genuinely good films",
-                                "Read thoughtful reviews",
-                                "Follow reviewers I can trust",
-                                "Explore curated movie lists",
+                                "Deciding if a movie is worth watching",
+                                "Avoiding bad or overhyped movies",
+                                "Finding genuinely good films",
+                                "Discovering hidden gems",
+                                "Following trusted reviewers",
                             ]}
                             selected={data.user_intent}
                             onChange={(vals) => setData({ ...data, user_intent: vals })}
                         />
-                    </motion.div>
+                    </>
                 );
-            case 2: // Watching Habits
+            case 2:
                 return (
-                    <motion.div
-                        key="step2"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-8"
-                    >
-                        <StepHeader
-                            title="Watching Habits"
-                            subtitle="How do you consume movies?"
+                    <>
+                        <h1 className="text-3xl font-bold mb-2">How do you usually watch movies?</h1>
+                        <p className="text-muted-foreground text-lg mb-8">Select one.</p>
+                        <SingleSelectOptions
+                            options={["Mostly in theatres", "Mostly at home (streaming)", "Both equally"]}
+                            selected={data.watch_mode}
+                            onChange={(val) => setData({ ...data, watch_mode: val })}
+                            autoAdvance={nextStep}
                         />
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">How do you usually watch movies?</h3>
-                            <SingleSelect
-                                options={["In theatres", "At home (streaming)", "Both"]}
-                                selected={data.watch_mode}
-                                onChange={(val) => setData({ ...data, watch_mode: val })}
-                            />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">How often do you watch movies?</h3>
-                            <SingleSelect
-                                options={["Rarely (1–2 per month)", "Occasionally (3–6 per month)", "Often (weekly)", "Very often (multiple times a week)"]}
-                                selected={data.watch_frequency}
-                                onChange={(val) => setData({ ...data, watch_frequency: val })}
-                            />
-                        </div>
-                    </motion.div>
+                    </>
                 );
-            case 3: // Taste & Style
+            case 3:
                 return (
-                    <motion.div
-                        key="step3"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-8"
-                    >
-                        <StepHeader
-                            title="Taste & Style"
-                            subtitle="What do you enjoy?"
+                    <>
+                        <h1 className="text-3xl font-bold mb-2">How often do you watch movies?</h1>
+                        <p className="text-muted-foreground text-lg mb-8">Usually.</p>
+                        <SingleSelectOptions
+                            options={["Occasionally (1–2 per month)", "Regularly (weekly)", "Very often (multiple times a week)"]}
+                            selected={data.watch_frequency}
+                            onChange={(val) => setData({ ...data, watch_frequency: val })}
+                            autoAdvance={nextStep}
                         />
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Genres you enjoy</h3>
-                            <MultiSelect
-                                options={["Drama", "Thriller", "Crime", "Romance", "Action", "Sci-Fi", "Fantasy", "Horror", "Comedy", "Animation", "Documentary", "Indie / Experimental"]}
-                                selected={data.preferred_genres}
-                                onChange={(vals) => setData({ ...data, preferred_genres: vals })}
-                            />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">What matters most?</h3>
-                            <MultiSelect
-                                options={["Writing & story", "Acting performances", "Direction & cinematography", "Emotional impact", "Original ideas", "Entertainment value"]}
-                                selected={data.taste_factors}
-                                onChange={(vals) => setData({ ...data, taste_factors: vals })}
-                            />
-                        </div>
-                    </motion.div>
+                    </>
                 );
-            case 4: // Language & Culture
+            case 4:
                 return (
-                    <motion.div
-                        key="step4"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-8"
-                    >
-                        <StepHeader
-                            title="Industries & Languages"
-                            subtitle="What regions do you follow?"
+                    <>
+                        <h1 className="text-3xl font-bold mb-2">What kinds of movies do you enjoy?</h1>
+                        <p className="text-muted-foreground text-lg mb-8">Select your favorites.</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {["Drama", "Thriller", "Crime", "Romance", "Action", "Sci-Fi", "Fantasy", "Horror", "Comedy", "Animation", "Documentary", "Indie"].map(genre => (
+                                <button
+                                    key={genre}
+                                    onClick={() => {
+                                        const selected = data.preferred_genres.includes(genre);
+                                        if (selected) {
+                                            setData({ ...data, preferred_genres: data.preferred_genres.filter(g => g !== genre) });
+                                        } else {
+                                            setData({ ...data, preferred_genres: [...data.preferred_genres, genre] });
+                                        }
+                                    }}
+                                    className={cn(
+                                        "py-3 px-2 rounded-xl text-center font-medium border-2 transition-all",
+                                        data.preferred_genres.includes(genre)
+                                            ? "border-primary bg-primary/10 text-primary"
+                                            : "border-transparent bg-secondary/50 hover:bg-secondary text-muted-foreground"
+                                    )}
+                                >
+                                    {genre}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                );
+            case 5:
+                return (
+                    <>
+                        <h1 className="text-3xl font-bold mb-2">What matters most to you?</h1>
+                        <p className="text-muted-foreground text-lg mb-8">Select your top priorities.</p>
+                        <MultiSelectOptions
+                            options={[
+                                "Strong story & writing",
+                                "Acting performances",
+                                "Direction & cinematography",
+                                "Emotional impact",
+                                "Original ideas",
+                                "Entertainment value",
+                            ]}
+                            selected={data.taste_factors}
+                            onChange={(vals) => setData({ ...data, taste_factors: vals })}
                         />
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Preferred industries</h3>
-                            <MultiSelect
-                                options={["Hollywood", "Indian cinema", "Korean", "Japanese", "European", "Mixed / World cinema"]}
-                                selected={data.preferred_industries}
-                                onChange={(vals) => setData({ ...data, preferred_industries: vals })}
-                            />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Preferred languages</h3>
-                            <MultiSelect
-                                options={["English", "Hindi", "Spanish", "French", "Korean", "Japanese", "Mandarin", "German"]} // Simplified list
-                                selected={data.preferred_languages}
-                                onChange={(vals) => setData({ ...data, preferred_languages: vals })}
-                            />
-                        </div>
-                    </motion.div>
+                    </>
                 );
-            case 5: // Reviews & Spoilers
+            case 6:
                 return (
-                    <motion.div
-                        key="step5"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-8"
-                    >
-                        <StepHeader
-                            title="Preferences"
-                            subtitle="How do you want to see reviews?"
+                    <>
+                        <h1 className="text-3xl font-bold mb-2">Which movie industries do you watch?</h1>
+                        <p className="text-muted-foreground text-lg mb-8">Select all that apply.</p>
+                        <div className="flex flex-wrap gap-3">
+                            {["Hollywood", "Indian", "Korean", "Japanese", "European", "World cinema"].map(opt => (
+                                <button
+                                    key={opt}
+                                    onClick={() => {
+                                        const selected = data.preferred_industries.includes(opt);
+                                        if (selected) {
+                                            setData({ ...data, preferred_industries: data.preferred_industries.filter(i => i !== opt) });
+                                        } else {
+                                            setData({ ...data, preferred_industries: [...data.preferred_industries, opt] });
+                                        }
+                                    }}
+                                    className={cn(
+                                        "px-6 py-3 rounded-full text-lg font-medium border-2 transition-all",
+                                        data.preferred_industries.includes(opt)
+                                            ? "border-primary bg-primary/10 text-primary"
+                                            : "border-border bg-transparent hover:border-primary/50 text-foreground"
+                                    )}
+                                >
+                                    {opt}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                );
+            case 7:
+                return (
+                    <>
+                        <h1 className="text-3xl font-bold mb-2">How do you prefer movie reviews?</h1>
+                        <p className="text-muted-foreground text-lg mb-8">Help us tailor your feed.</p>
+                        <MultiSelectOptions
+                            options={[
+                                "Short verdicts",
+                                "Detailed reviews",
+                                "Curated lists",
+                                "A few trusted reviewers",
+                                "Consensus from trusted voices",
+                            ]}
+                            selected={data.review_style_preferences}
+                            onChange={(vals) => setData({ ...data, review_style_preferences: vals })}
                         />
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">What kind of reviews are useful?</h3>
-                            <MultiSelect
-                                options={["Short, clear verdicts", "Detailed written reviews", "Editorial curated lists", "A small set of trusted reviewers", "Overall consensus"]}
-                                selected={data.review_style_preferences}
-                                onChange={(vals) => setData({ ...data, review_style_preferences: vals })}
-                            />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Spoiler tolerance</h3>
-                            <SingleSelect
-                                options={["Avoid all spoilers", "Minor hints are okay", "Spoilers don’t bother me"]}
-                                selected={data.spoiler_tolerance}
-                                onChange={(val) => setData({ ...data, spoiler_tolerance: val })}
-                            />
-                        </div>
-                    </motion.div>
+                    </>
                 );
-            case 6: // Expectation Setting (Final)
+            case 8:
                 return (
-                    <motion.div
-                        key="step6"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="text-center space-y-8 py-8"
-                    >
-                        <div className="space-y-4">
-                            <h1 className="text-4xl font-bold">How this platform works</h1>
-                            <div className="max-w-md mx-auto space-y-4 text-lg text-muted-foreground text-left bg-muted/30 p-8 rounded-2xl border border-border">
-                                <ul className="list-disc pl-5 space-y-2">
-                                    <li>Anyone can read reviews.</li>
-                                    <li>Publishing reviews is earned through knowledge and peer trust.</li>
-                                    <li>We do not use star ratings or popularity metrics.</li>
-                                    <li>Our goal is to help you decide confidently.</li>
-                                </ul>
+                    <>
+                        <h1 className="text-3xl font-bold mb-2">How do you feel about spoilers?</h1>
+                        <p className="text-muted-foreground text-lg mb-8">We can hide them for you.</p>
+                        <SingleSelectOptions
+                            options={["Avoid all spoilers", "Minor hints are okay", "Spoilers don’t bother me"]}
+                            selected={data.spoiler_tolerance}
+                            onChange={(val) => setData({ ...data, spoiler_tolerance: val })}
+                            autoAdvance={() => setStep(9)}
+                        />
+                    </>
+                );
+            case 9: // Final
+                return (
+                    <div className="text-center py-8">
+                        <h1 className="text-4xl font-bold mb-6">How this platform works</h1>
+                        <div className="text-left bg-secondary/30 p-8 rounded-2xl space-y-4 mb-8">
+                            <div className="flex items-start gap-4">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mt-1">1</div>
+                                <p className="text-lg">Anyone can read reviews, but writing them is an earned privilege.</p>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mt-1">2</div>
+                                <p className="text-lg">We don't use star ratings or popularity metrics to judge quality.</p>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mt-1">3</div>
+                                <p className="text-lg">Our goal is to help you decide confidently, not to sell you tickets.</p>
                             </div>
                         </div>
-                        <Button size="lg" className="w-full max-w-xs" onClick={handleComplete} disabled={loading}>
-                            Start Exploring
+                        <Button size="lg" className="w-full text-lg h-14 rounded-xl" onClick={handleComplete} disabled={loading}>
+                            {loading ? "Setting up..." : "Start Exploring"}
                         </Button>
-                    </motion.div>
+                    </div>
                 );
             default:
                 return null;
@@ -327,45 +344,58 @@ export function OnboardingFlow() {
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-2xl">
-                {/* Progress Indicator */}
-                {step < totalSteps && (
-                    <div className="mb-8 flex items-center justify-between text-sm text-muted-foreground">
-                        <span>Step {step} of {totalSteps - 1}</span>
-                        <div className="flex gap-1">
-                            {Array.from({ length: totalSteps - 1 }).map((_, i) => (
-                                <div
-                                    key={i}
-                                    className={cn(
-                                        "h-1 w-8 rounded-full transition-colors",
-                                        i + 1 <= step ? "bg-primary" : "bg-muted"
-                                    )}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
+        <div className="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-pink-50 flex flex-col items-center justify-center p-4">
 
-                <AnimatePresence mode="wait">
-                    {renderStep()}
-                </AnimatePresence>
+            {/* Progress Bar - Only check until step 8 */}
+            {step <= 8 && (
+                <div className="w-full max-w-xl mb-8 flex justify-between px-2">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <div
+                            key={i}
+                            className={cn(
+                                "h-1.5 flex-1 mx-1 rounded-full transition-all duration-300",
+                                i + 1 <= step ? "bg-primary" : "bg-black/10"
+                            )}
+                        />
+                    ))}
+                </div>
+            )}
 
-                {/* Navigation */}
-                {step < totalSteps && (
-                    <div className="mt-12 flex justify-between items-center">
-                        <button
-                            onClick={skipStep}
-                            className="text-muted-foreground hover:text-foreground text-sm font-medium px-4 py-2"
-                        >
-                            Skip for now
-                        </button>
-                        <Button onClick={nextStep} disabled={loading} size="lg">
-                            {loading ? "Saving..." : "Next"}
-                        </Button>
-                    </div>
-                )}
-            </div>
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={step}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full max-w-2xl"
+                >
+                    <StepContainer>
+                        {renderContent()}
+                    </StepContainer>
+                </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation Buttons */}
+            {step <= 8 && (
+                <div className="w-full max-w-2xl mt-8 flex justify-between items-center px-4">
+                    <button
+                        onClick={skipStep}
+                        className="text-muted-foreground hover:text-foreground font-medium transition-colors"
+                    >
+                        Skip for now
+                    </button>
+
+                    <Button
+                        onClick={nextStep}
+                        size="lg"
+                        className="rounded-xl px-8"
+                        disabled={loading}
+                    >
+                        Next <ChevronRight className="w-4 h-4 ml-2" />
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
